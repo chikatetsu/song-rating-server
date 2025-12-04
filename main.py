@@ -9,13 +9,15 @@ from service import get_certitude, get_number_of_downvotes, get_number_of_upvote
 
 
 load_dotenv()
-AUTH_TOKEN = getenv("AUTH_TOKEN")
+AUTH_TOKEN = getenv("AUTH_TOKEN", "")
 
 app = FastAPI()
 security = HTTPBearer()
 cache = RatesCache()
 
 def verify_bearer_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    if AUTH_TOKEN == "":
+        return True
     if credentials.credentials != AUTH_TOKEN:
         raise HTTPException(status_code=401, detail="Invalid token")
     return True
