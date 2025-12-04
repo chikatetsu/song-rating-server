@@ -19,11 +19,7 @@ unique authentication token needs to be generated and used by your clients
 to work with this API.
 
 ## Installation
-First, clone the repository on your server as usual :
-```bash
-git repo clone chikatetsu/SongRating
-```
-Then, install Python if it's not already done (I use Python 3.12).
+Install Python on your server if it's not already done (I use Python 3.12).
 
 Create your Python environment and install the required packages
 ([see requirements.txt](https://github.com/chikatetsu/song-rating-server/blob/main/requirements.txt)) :
