@@ -12,12 +12,14 @@ load_dotenv()
 AUTH_TOKEN = getenv("AUTH_TOKEN", "")
 
 app = FastAPI()
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 cache = RatesCache()
 
 def verify_bearer_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if AUTH_TOKEN == "":
         return True
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Missing Authorization Header")
     if credentials.credentials != AUTH_TOKEN:
         raise HTTPException(status_code=401, detail="Invalid token")
     return True

@@ -19,8 +19,10 @@ unique authentication token needs to be generated and used by your clients
 to work with this API.
 
 ## Installation
-Install Python on your server if it's not already done (I use Python 3.12).
+### 1. Install Python
+If it's not already done, install Python on your server. I use Python 3.12.
 
+### 2. Create the Python Environment
 Create your Python environment and install the required packages
 ([see requirements.txt](https://github.com/chikatetsu/song-rating-server/blob/main/requirements.txt)) :
 ```bash
@@ -28,8 +30,13 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+### 3. Generate the authentication token
 Now that the packages are installed, you can generate the `.env` file 
-containing your personal authentication token :
+containing your personal authentication token.
+
+**I highly recommend you to generate this token to protect the data on your server. Without the**
+`.env` **file, the API will be accessible without any authentication token. If you are willing to take that risk and that your server is only accessible at your house, you can skip this step.**
 ```bash
 python generate_token.py
 ```
@@ -48,6 +55,7 @@ command (see
 **script to erase your current token and recreate a new one. Don't forget to kill the API before running the script, and share the new**
 `.env` **file to your Song Rating clients.**
 
+### 4. Run the API
 You can now run the API using Uvicorn. Feel free to add more arguments to this
 command if needed ([see documentation of Uvicorn](https://uvicorn.dev/#command-line-options)) :
 ```bash
