@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 from networkx.drawing.nx_agraph import graphviz_layout
 from collections import defaultdict
 
-from pygments.styles.dracula import background
-
 
 def load_graph():
     with open("rates_graph.json") as f:
@@ -93,7 +91,7 @@ if __name__ == "__main__":
 
     # Calculer et stocker le nombre de descendants comme attribut
     for n in G.nodes:
-        G.nodes[n]["subset"] = len(nx.descendants(G, n))
+        G.nodes[n]["subset"] = descendants_count(G, n)
 
     # Calculer la disposition de base (gauche à droite)
     pos = layout_components(G)

@@ -1,0 +1,27 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "This is the server part of the Song Rating environment. It's an API developped in Python using FastAPI and Uvicorn. The server is a centralized way to store the leaderboard since you can run a Song Rating client on different devices. The API exposes routes to get the leaderboard, vote for a song, get info on the current rate of a song or artist, and see if a song  has already been compared to an other. See `/docs` for all endpoints.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chikatetsu/song-rating-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/chikatetsu/song-rating-server/issues"
+  },
+  "homepage": "https://github.com/chikatetsu/song-rating-server#readme",
+  "devDependencies": {
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/github": "^11.0.6",
+    "@semantic-release/release-notes-generator": "^14.1.0",
+    "semantic-release": "^24.2.9"
+  }
+}

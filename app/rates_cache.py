@@ -1,6 +1,6 @@
-from elo_ranking import EloRanking
-from graph import Graph, sort_graph
-from service import sort_dict_by_score, artist_rate
+from app.elo_ranking import EloRanking
+from app.graph import Graph, sort_graph
+from app.service import sort_dict_by_score, artist_rate
 
 
 class Cache:

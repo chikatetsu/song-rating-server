@@ -3,9 +3,9 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from os import getenv
 
-from dto import RateRequest, StatusRequest, RateUpResponse, RankResponse, SongInfoResponse
-from rates_cache import RatesCache
-from service import get_certitude, get_number_of_downvotes, get_number_of_upvotes, get_status_between_songs
+from app.dto import RateRequest, StatusRequest, RateUpResponse, RankResponse, SongInfoResponse
+from app.rates_cache import RatesCache
+from app.service import get_certitude, get_number_of_downvotes, get_number_of_upvotes, get_status_between_songs
 
 
 load_dotenv()

@@ -1,5 +1,6 @@
-from graph import Graph
 from re import split as re_split
+
+from app.graph import Graph
 
 
 def artist_rate(elo: dict[str, float]) -> dict[str, float]:

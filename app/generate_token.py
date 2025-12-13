@@ -8,7 +8,7 @@ def generate_token(lenght=16):
     return token
 
 def save_env(auth_token: str):
-    with open(".env", "w") as f:
+    with open("../.env", "w") as f:
         f.write(f"AUTH_TOKEN={auth_token}")
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 from json import load as json_load, dump as json_dump
 
-from graph import Graph
+from app.graph import Graph
 
 
 class EloRanking:
