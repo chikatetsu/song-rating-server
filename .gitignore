@@ -13,6 +13,8 @@ ENV/
 env.bak/
 venv.bak/
 .idea/
+node_modules/
 
 # Leaderboard files
-*.json
+rates_graph.json
+elo_scores.json
