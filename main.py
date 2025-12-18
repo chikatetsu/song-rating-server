@@ -11,6 +11,7 @@ from app.service import get_certitude, get_status_between_songs
 
 load_dotenv()
 AUTH_TOKEN = getenv("AUTH_TOKEN", "")
+IS_DEV = getenv("DEV") is not None
 
 cache = RatesCache()
 
@@ -19,7 +20,12 @@ async def lifespan(app: FastAPI):
     yield
     cache.db.disconnect()
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    docs_url="/docs" if IS_DEV else None,
+    redoc_url="/redoc" if IS_DEV else None,
+    openapi_url="/openapi.json" if IS_DEV else None,
+)
 security = HTTPBearer(auto_error=False)
 
 def verify_bearer_token(credentials: HTTPAuthorizationCredentials = Depends(security)):

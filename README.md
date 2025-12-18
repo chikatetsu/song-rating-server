@@ -75,6 +75,12 @@ command if needed ([see documentation of Uvicorn](https://uvicorn.dev/#command-l
 ```bash
 uvicorn main:app
 ```
+If you want to run the API in a development enviromnent, you will have to give a
+value to the `DEV` environment variable using the `.env` file, or by running this
+command :
+```bash
+DEV=true uvicorn main:app --reload
+```
 Your Song Rating server is now up and running, ready to rank your songs!
 
 ## Coming soon
