@@ -1,4 +1,4 @@
-from app.db_connection import DBConnection
+from db_connection import DBConnection
 from app.elo_ranking import EloRanking
 from app.graph import Graph
 from app.service import sort_dict_by_score, artist_rate

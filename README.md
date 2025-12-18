@@ -58,6 +58,8 @@ command (see
 ### 4. Init the Database
 Create an empty database by running the `build_schema_sql.sh` script :
 ```bash
+chmod +x *.sh
+sudo apt-get install sqlite3 libsqlite3-dev
 ./build_schema_sql.sh
 ```
 A file named `rank.sql` should appear at the root of the project.
@@ -66,7 +68,7 @@ A file named `rank.sql` should appear at the root of the project.
 In case you already runned the API from a previous version, you can keep your
 previous leaderboard by loading the database with your old `rates_graph.json file` :
 ```bash
-python app/db_connection.py
+python db_connection.py
 ```
 
 ### 6. Run the API
