@@ -1,6 +1,6 @@
 from app.db_connection import DBConnection
 from app.elo_ranking import EloRanking
-from app.graph import sort_graph, Graph
+from app.graph import Graph
 from app.service import sort_dict_by_score, artist_rate
 
 
@@ -26,9 +26,8 @@ class Cache:
 
 class SongRateCache(Cache):
     def _set_rate(self, new_rates: Graph):
-        scc = new_rates.get_scc()
-        compressed = new_rates.condense(scc)
-        self.rates = sort_graph(compressed, scc)
+        scores = new_rates.sort_graph()
+        self.rates = sort_dict_by_score(scores)
 
 class ArtistRateCache(Cache):
     def _set_rate(self, new_rates: dict[str, float]):
@@ -58,9 +57,18 @@ class RatesCache:
             self.db.insert_vote(better_id, worse_id)
             self.notify_change()
 
-    def get_song_rates(self) -> list[str]:
+    def get_song_rates(self) -> list[dict[str, object]]:
         self._song_rates.update_rates(self.rates)
         return self._song_rates.rates
+
+    def get_graph_rank_of(self, song_name: str) -> int:
+        self._song_rates.update_rates(self.rates)
+        index = 0
+        for i in range(len(self.rates)):
+            if self._song_rates[i].get("name") == song_name:
+                index = i
+                break
+        return index
 
     def get_artist_rates(self) -> list[dict[str, object]]:
         self._artist_rates.update_rates(self.elo_ranking.scores)

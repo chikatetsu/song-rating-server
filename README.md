@@ -79,5 +79,5 @@ Your Song Rating server is now up and running, ready to rank your songs!
 
 ## Coming soon
 - [ ] Pagination
-- [ ] Enhancement for the graph leaderboard
+- [x] Enhancement for the graph leaderboard
 - [ ] Single artist rank

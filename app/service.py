@@ -5,7 +5,7 @@ from app.graph import Graph
 
 def artist_rate(elo: dict[str, float]) -> dict[str, float]:
     artists = {}
-    formatted_elo = {song.replace("Tyler, The Creator", "Tyler The Creator"): artist for song, artist in elo.items()}
+    formatted_elo = {song.replace("Tyler, The Creator", "Tyler The Creator"): score for song, score in elo.items()}
     songs = list(formatted_elo.keys())
 
     for current_song in songs:
@@ -28,18 +28,6 @@ def sort_dict_by_score(scores: dict[str, float], reverse = True) -> list[dict[st
     sorted_items = sorted(scores.items(), key=lambda item: item[1], reverse=reverse)
     res = [{"name": key, "score": value} for key, value in sorted_items]
     return res
-
-def get_number_of_upvotes(graph: Graph, song_id: int) -> int:
-    if graph.is_node_exist(song_id):
-        nb_votes = len(graph[song_id].worse_songs)
-        return nb_votes
-    return 0
-
-def get_number_of_downvotes(graph: Graph, song_id: int) -> int:
-    if graph.is_node_exist(song_id):
-        nb_votes = len(graph[song_id].better_songs)
-        return nb_votes
-    return 0
 
 def get_certitude(nb_votes: int, nb_songs: int) -> float:
     portion = nb_votes / nb_songs
