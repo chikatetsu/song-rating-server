@@ -29,18 +29,17 @@ def sort_dict_by_score(scores: dict[str, float], reverse = True) -> list[dict[st
     res = [{"name": key, "score": value} for key, value in sorted_items]
     return res
 
-def get_number_of_upvotes(graph: Graph, song: str) -> int:
-    if graph.is_node_exist(song):
-        nb_votes = len(graph[song])
+def get_number_of_upvotes(graph: Graph, song_id: int) -> int:
+    if graph.is_node_exist(song_id):
+        nb_votes = len(graph[song_id].worse_songs)
         return nb_votes
     return 0
 
-def get_number_of_downvotes(graph: Graph, song: str) -> int:
-    nb_votes = 0
-    for votes in graph.values():
-        if song in votes:
-            nb_votes += 1
-    return nb_votes
+def get_number_of_downvotes(graph: Graph, song_id: int) -> int:
+    if graph.is_node_exist(song_id):
+        nb_votes = len(graph[song_id].better_songs)
+        return nb_votes
+    return 0
 
 def get_certitude(nb_votes: int, nb_songs: int) -> float:
     portion = nb_votes / nb_songs
@@ -48,9 +47,9 @@ def get_certitude(nb_votes: int, nb_songs: int) -> float:
     percentage = round(cert * 100, 2)
     return percentage
 
-def get_status_between_songs(graph: Graph, song1: str, song2: str) -> dict[str, str]:
-    is_first_song_exists = graph.is_node_exist(song1)
-    is_second_song_exists = graph.is_node_exist(song2)
+def get_status_between_songs(graph: Graph, first_song_id: int, second_song_id: int) -> dict[str, str]:
+    is_first_song_exists = graph.is_node_exist(first_song_id)
+    is_second_song_exists = graph.is_node_exist(second_song_id)
 
     if not is_first_song_exists and not is_second_song_exists:
         response = {
@@ -59,22 +58,22 @@ def get_status_between_songs(graph: Graph, song1: str, song2: str) -> dict[str, 
         }
     elif not is_first_song_exists:
         response = {
-            "song": song1,
+            "song": graph[first_song_id].name,
             "status": "not found"
         }
     elif not is_second_song_exists:
         response = {
-            "song": song2,
+            "song": graph[second_song_id].name,
             "status": "not found"
         }
-    elif song1 in graph[song2]:
+    elif first_song_id in graph[second_song_id].worse_songs:
         response = {
-            "song": song2,
+            "song": graph[second_song_id].name,
             "status": "better"
         }
-    elif song2 in graph[song1]:
+    elif second_song_id in graph[first_song_id].worse_songs:
         response = {
-            "song": song1,
+            "song": graph[first_song_id].name,
             "status": "better"
         }
     else:

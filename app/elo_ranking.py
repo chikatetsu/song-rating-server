@@ -30,17 +30,17 @@ class EloRanking:
 
 
 def init_elo(graph: Graph) -> dict[str, float]:
-    remainings = list(graph.keys())
+    remainings = [node.name for node in graph.values()]
     ranking = EloRanking()
     i = 0
     while len(remainings) > 0:
         j = 0
         while j < len(remainings):
             song = remainings[j]
-            if len(graph[song]) == i:
+            if len(graph[song].worse_songs) == i:
                 remainings.pop(j)
                 continue
-            other_song = graph[song][i]
+            other_song = graph[song].worse_songs[i]
             ranking.update_elo(song, other_song)
             j += 1
         i += 1

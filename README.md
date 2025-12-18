@@ -55,7 +55,21 @@ command (see
 **script to erase your current token and recreate a new one. Don't forget to kill the API before running the script, and share the new**
 `.env` **file to your Song Rating clients.**
 
-### 4. Run the API
+### 4. Init the Database
+Create an empty database by running the `build_schema_sql.sh` script :
+```bash
+./build_schema_sql.sh
+```
+A file named `rank.sql` should appear at the root of the project.
+
+### 5. Load a database from a JSON file (optional)
+In case you already runned the API from a previous version, you can keep your
+previous leaderboard by loading the database with your old `rates_graph.json file` :
+```bash
+python app/db_connection.py
+```
+
+### 6. Run the API
 You can now run the API using Uvicorn. Feel free to add more arguments to this
 command if needed ([see documentation of Uvicorn](https://uvicorn.dev/#command-line-options)) :
 ```bash

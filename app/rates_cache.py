@@ -1,5 +1,6 @@
+from app.db_connection import DBConnection
 from app.elo_ranking import EloRanking
-from app.graph import Graph, sort_graph
+from app.graph import sort_graph, Graph
 from app.service import sort_dict_by_score, artist_rate
 
 
@@ -24,27 +25,38 @@ class Cache:
 
 
 class SongRateCache(Cache):
-    def _set_rate(self, new_rates):
-        compressed, scc = new_rates.condense()
+    def _set_rate(self, new_rates: Graph):
+        scc = new_rates.get_scc()
+        compressed = new_rates.condense(scc)
         self.rates = sort_graph(compressed, scc)
 
 class ArtistRateCache(Cache):
-    def _set_rate(self, new_rates):
+    def _set_rate(self, new_rates: dict[str, float]):
         self.rates = sort_dict_by_score(artist_rate(new_rates))
 
 class EloRatesCache(Cache):
-    def _set_rate(self, new_rates):
+    def _set_rate(self, new_rates: dict[str, float]):
         self.rates = sort_dict_by_score(new_rates)
 
 
 class RatesCache:
     def __init__(self):
-        self.rates = Graph()
-        self.rates.load_graph_from_file()
+        self.db = DBConnection()
+        self.rates = self.db.load_graph()
         self.elo_ranking = EloRanking()
         self._song_rates = SongRateCache()
         self._artist_rates = ArtistRateCache()
         self._elo_rates = EloRatesCache()
+
+    def vote(self, better_song: str, worse_song: str):
+        self.db.insert_song(better_song)
+        self.db.insert_song(worse_song)
+        better_id = self.db.get_id_by_song_name(better_song)
+        worse_id = self.db.get_id_by_song_name(worse_song)
+        if self.rates.create_edge(better_id, worse_id):
+            self.elo_ranking.update_elo(better_song, worse_song)
+            self.db.insert_vote(better_id, worse_id)
+            self.notify_change()
 
     def get_song_rates(self) -> list[str]:
         self._song_rates.update_rates(self.rates)

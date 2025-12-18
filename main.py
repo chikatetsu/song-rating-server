@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
@@ -11,9 +12,15 @@ from app.service import get_certitude, get_number_of_downvotes, get_number_of_up
 load_dotenv()
 AUTH_TOKEN = getenv("AUTH_TOKEN", "")
 
-app = FastAPI()
-security = HTTPBearer(auto_error=False)
 cache = RatesCache()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    cache.db.disconnect()
+
+app = FastAPI(lifespan=lifespan)
+security = HTTPBearer(auto_error=False)
 
 def verify_bearer_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if AUTH_TOKEN == "":
@@ -27,17 +34,16 @@ def verify_bearer_token(credentials: HTTPAuthorizationCredentials = Depends(secu
 @app.post("/rate", dependencies=[Depends(verify_bearer_token)])
 def rate_up(data: RateRequest):
     global cache
-    if cache.rates.create_edge(data.better_song, data.worse_song):
-        cache.elo_ranking.update_elo(data.better_song, data.worse_song)
-        cache.rates.save_graph()
-        cache.notify_change()
+    cache.vote(data.better_song, data.worse_song)
     res = RateUpResponse(response=f"{data.better_song} > {data.worse_song}")
     return res
 
 @app.post("/status", dependencies=[Depends(verify_bearer_token)])
 def status(data: StatusRequest):
     global cache
-    res = get_status_between_songs(cache.rates, data.first_song, data.second_song)
+    first_song_id = cache.db.get_id_by_song_name(data.first_song)
+    second_song_id = cache.db.get_id_by_song_name(data.second_song)
+    res = get_status_between_songs(cache.rates, first_song_id, second_song_id)
     return res
 
 @app.get("/rate", dependencies=[Depends(verify_bearer_token)])
@@ -57,14 +63,15 @@ def get_elo():
 @app.get("/rate/{song}", dependencies=[Depends(verify_bearer_token)])
 def get_rates(song: str):
     global cache
-    if not cache.rates.is_node_exist(song):
+    song_id = cache.db.get_id_by_song_name(song)
+    if not cache.rates.is_node_exist(song_id):
         raise HTTPException(status_code=404, detail="No song with that name were found")
     graph_rates = cache.get_song_rates()
     graph_rank = graph_rates.index(song)
     elo_rank = cache.get_elo_rank_of(song)
     elo_score = cache.elo_ranking.scores[song]
-    nb_upvotes = get_number_of_upvotes(cache.rates, song)
-    nb_downvotes = get_number_of_downvotes(cache.rates, song)
+    nb_upvotes = get_number_of_upvotes(cache.rates, song_id)
+    nb_downvotes = get_number_of_downvotes(cache.rates, song_id)
     certitude = get_certitude(nb_upvotes + nb_downvotes, len(cache.rates))
     res = SongInfoResponse(graph_rank=graph_rank, elo_rank=elo_rank, elo_score=elo_score, nb_upvotes=nb_upvotes, nb_downvotes=nb_downvotes, certitude=certitude)
     return res
