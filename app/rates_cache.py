@@ -77,7 +77,7 @@ class RatesCache:
     def get_song_rates(self) -> list[RankObject]:
         self._song_rates.update_rates(self.rates)
         song_rates = self._song_rates.rates
-        if self._old_song_rates.last_update + timedelta(days=7) > datetime.now():
+        if self._old_song_rates.last_update + timedelta(days=7) < datetime.now():
             self._old_song_rates.set_has_outdated()
             self._old_song_rates.update_rates(song_rates)
         else:
