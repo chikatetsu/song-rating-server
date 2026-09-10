@@ -4,7 +4,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from os import getenv
 
-from app.dto import RateRequest, StatusRequest, RateUpResponse, RankResponse, SongInfoResponse
+from app.dto import RateRequest, StatusRequest, RateUpResponse, RankResponse, SongInfoResponse, StatusBetweenSongsResponse
 from app.rates_cache import RatesCache
 from app.service import get_certitude, get_status_between_songs
 
@@ -38,21 +38,21 @@ def verify_bearer_token(credentials: HTTPAuthorizationCredentials = Depends(secu
     return True
 
 @app.get("/rate", dependencies=[Depends(verify_bearer_token)])
-def get_rate():
+def get_rate() -> RankResponse:
     global cache
     scores = cache.get_song_rates()
     res = RankResponse(ranks=scores)
     return res
 
 @app.post("/rate", dependencies=[Depends(verify_bearer_token)])
-def rate_up(data: RateRequest):
+def rate_up(data: RateRequest) -> RateUpResponse:
     global cache
     cache.vote(data.better_song, data.worse_song)
     res = RateUpResponse(response=f"{data.better_song} > {data.worse_song}")
     return res
 
 @app.get("/rate/{song}", dependencies=[Depends(verify_bearer_token)])
-def get_rates(song: str):
+def get_rates(song: str) -> SongInfoResponse:
     global cache
     song_id = cache.db.get_id_by_song_name(song)
     if not cache.rates.is_node_exist(song_id):
@@ -67,7 +67,7 @@ def get_rates(song: str):
     return res
 
 @app.post("/status", dependencies=[Depends(verify_bearer_token)])
-def status(data: StatusRequest):
+def status(data: StatusRequest) -> StatusBetweenSongsResponse:
     global cache
     first_song_id = cache.db.get_id_by_song_name(data.first_song)
     second_song_id = cache.db.get_id_by_song_name(data.second_song)
@@ -75,14 +75,14 @@ def status(data: StatusRequest):
     return res
 
 @app.get("/elo", dependencies=[Depends(verify_bearer_token)])
-def get_elo():
+def get_elo() -> RankResponse:
     global cache
     scores = cache.get_elo_scores()
     res = RankResponse(ranks=scores)
     return res
 
 @app.get("/artist", dependencies=[Depends(verify_bearer_token)])
-def get_artist_rate():
+def get_artist_rate() -> RankResponse:
     global cache
     scores = cache.get_artist_rates()
     res = RankResponse(ranks=scores)

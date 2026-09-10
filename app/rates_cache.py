@@ -1,7 +1,10 @@
+from datetime import datetime, timedelta
+
+from app.dto import RankObject
 from db_connection import DBConnection
 from app.elo_ranking import EloRanking
 from app.graph import Graph
-from app.service import sort_dict_by_score, artist_rate
+from app.service import sort_dict_by_score, artist_rate, to_rank_only
 
 
 class Cache:
@@ -37,15 +40,29 @@ class EloRatesCache(Cache):
     def _set_rate(self, new_rates: dict[str, float]):
         self.rates = sort_dict_by_score(new_rates)
 
+class OldRankCache(Cache):
+    def __init__(self):
+        super().__init__()
+        self.last_update = datetime.now()
+
+    def _set_rate(self, new_rates: list[RankObject]):
+        self.rates = to_rank_only(new_rates)
+        self.last_update = datetime.now()
+
 
 class RatesCache:
     def __init__(self):
         self.db = DBConnection()
         self.rates = self.db.load_graph()
         self.elo_ranking = EloRanking()
+
         self._song_rates = SongRateCache()
         self._artist_rates = ArtistRateCache()
         self._elo_rates = EloRatesCache()
+        self._old_song_rates = OldRankCache()
+
+        self._song_rates.update_rates(self.rates)
+        self._old_song_rates.update_rates(self._song_rates.rates)
 
     def vote(self, better_song: str, worse_song: str):
         self.db.insert_song(better_song)
@@ -57,35 +74,38 @@ class RatesCache:
             self.db.insert_vote(better_id, worse_id)
             self.notify_change()
 
-    def get_song_rates(self) -> list[dict[str, object]]:
+    def get_song_rates(self) -> list[RankObject]:
         self._song_rates.update_rates(self.rates)
-        return self._song_rates.rates
+        song_rates = self._song_rates.rates
+        if self._old_song_rates.last_update + timedelta(days=7) > datetime.now():
+            self._old_song_rates.set_has_outdated()
+            self._old_song_rates.update_rates(song_rates)
+        else:
+            for i in range(len(song_rates)):
+                song_rates[i].old_rank = self._old_song_rates.rates.get(song_rates[i].name, song_rates[i].score)
+        return song_rates
 
     def get_graph_rank_of(self, song_name: str) -> int:
         self._song_rates.update_rates(self.rates)
-        index = 0
         for i in range(len(self.rates)):
-            if self._song_rates[i].get("name") == song_name:
-                index = i
-                break
-        return index
+            if self._song_rates[i].name == song_name:
+                return i
+        return -1
 
-    def get_artist_rates(self) -> list[dict[str, object]]:
+    def get_artist_rates(self) -> list[RankObject]:
         self._artist_rates.update_rates(self.elo_ranking.scores)
         return self._artist_rates.rates
 
-    def get_elo_scores(self) -> list[dict[str, object]]:
+    def get_elo_scores(self) -> list[RankObject]:
         self._elo_rates.update_rates(self.elo_ranking.scores)
         return self._elo_rates.rates
 
     def get_elo_rank_of(self, song_name: str) -> int:
         self._elo_rates.update_rates(self.elo_ranking.scores)
-        index = 0
         for i in range(len(self.rates)):
-            if self._elo_rates[i].get("name") == song_name:
-                index = i
-                break
-        return index
+            if self._elo_rates[i].name == song_name:
+                return i
+        return -1
 
     def notify_change(self):
         self._song_rates.set_has_outdated()
