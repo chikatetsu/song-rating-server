@@ -56,7 +56,7 @@ def get_rates(song: str) -> SongInfoResponse:
     global cache
     song_id = cache.db.get_id_by_song_name(song)
     if not cache.rates.is_node_exist(song_id):
-        raise HTTPException(status_code=404, detail="No song with that name were found")
+        raise HTTPException(status_code=404, detail=f"No song with the name \"{song}\" were found")
     graph_rank = cache.get_graph_rank_of(song)
     elo_rank = cache.get_elo_rank_of(song)
     elo_score = cache.elo_ranking.scores[song]
@@ -71,6 +71,14 @@ def status(data: StatusRequest) -> StatusBetweenSongsResponse:
     global cache
     first_song_id = cache.db.get_id_by_song_name(data.first_song)
     second_song_id = cache.db.get_id_by_song_name(data.second_song)
+    is_first_song_exists = graph.is_node_exist(first_song_id)
+    is_second_song_exists = graph.is_node_exist(second_song_id)
+    if not is_first_song_exists and not is_second_song_exists:
+        raise HTTPException(status_code=404, detail=f"{data.first_song} and {data.second_song} weren't found")
+    elif not is_first_song_exists:
+        raise HTTPException(status_code=404, detail=f"No song with the name \"{data.first_song}\" were found")
+    elif not is_second_song_exists:
+        raise HTTPException(status_code=404, detail=f"No song with the name \"{data.second_song}\" were found")
     res = get_status_between_songs(cache.rates, first_song_id, second_song_id)
     return res
 

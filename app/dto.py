@@ -29,5 +29,5 @@ class SongInfoResponse(BaseModel):
     certitude: float
 
 class StatusBetweenSongsResponse(BaseModel):
-    song: str
-    status: str
+    message: str
+    is_compared: bool
