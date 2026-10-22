@@ -43,19 +43,10 @@ def get_certitude(nb_votes: int, nb_songs: int) -> float:
     return percentage
 
 def get_status_between_songs(graph: Graph, first_song_id: int, second_song_id: int) -> StatusBetweenSongsResponse:
-    is_first_song_exists = graph.is_node_exist(first_song_id)
-    is_second_song_exists = graph.is_node_exist(second_song_id)
-
-    if not is_first_song_exists and not is_second_song_exists:
-        response = StatusBetweenSongsResponse(song="both", status="not found")
-    elif not is_first_song_exists:
-        response = StatusBetweenSongsResponse(song=graph[first_song_id].name, status="not found")
-    elif not is_second_song_exists:
-        response = StatusBetweenSongsResponse(song=graph[second_song_id].name, status="not found")
-    elif first_song_id in graph[second_song_id].worse_songs:
-        response = StatusBetweenSongsResponse(song=graph[second_song_id].name, status="better")
+    if first_song_id in graph[second_song_id].worse_songs:
+        response = StatusBetweenSongsResponse(message=f"{graph[second_song_id].name} > {graph[first_song_id].name}", is_compared=True)
     elif second_song_id in graph[first_song_id].worse_songs:
-        response = StatusBetweenSongsResponse(song=graph[first_song_id].name, status="better")
+        response = StatusBetweenSongsResponse(message=f"{graph[first_song_id].name} > {graph[second_song_id].name}", is_compared=True)
     else:
-        response = StatusBetweenSongsResponse(song="both", status="not compared yet")
+        response = StatusBetweenSongsResponse(message=f"{graph[first_song_id].name} et {graph[second_song_id].name} n'ont jamais été comparé", is_compared=False)
     return response
