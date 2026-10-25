@@ -47,6 +47,8 @@ def get_rate() -> RankResponse:
 @app.post("/rate", dependencies=[Depends(verify_bearer_token)])
 def rate_up(data: RateRequest) -> RateUpResponse:
     global cache
+    if data.better_song == "" or data.worse_song == "":
+        raise HTTPException(status_code=403, detail="Some parameters are empty")
     cache.vote(data.better_song, data.worse_song)
     res = RateUpResponse(response=f"{data.better_song} > {data.worse_song}")
     return res
@@ -95,3 +97,8 @@ def get_artist_rate() -> RankResponse:
     scores = cache.get_artist_rates()
     res = RankResponse(ranks=scores)
     return res
+
+@app.get("/next_song", dependencies=[Depends(verify_bearer_token)])
+def get_next_song(song: str) -> str:
+    # TODO
+    return ""
