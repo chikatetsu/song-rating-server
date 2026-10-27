@@ -16,16 +16,14 @@ class DBConnection:
         visited = {}
         for node, songs in rates_graph.items():
             if node not in visited:
-                self.insert_song(node)
-                node_id = self.get_id_by_song_name(node)
+                node_id = self.insert_song(node)
                 visited[node] = node_id
             else:
                 node_id = visited[node]
 
             for song in songs:
                 if song not in visited:
-                    self.insert_song(song)
-                    song_id = self.get_id_by_song_name(song)
+                    song_id = self.insert_song(song)
                     visited[song] = song_id
                 else:
                     song_id = visited[song]
@@ -48,9 +46,12 @@ class DBConnection:
         song = self._cursor.fetchone()[0]
         return song
 
-    def get_id_by_song_name(self, song_name: str) -> int:
+    def get_id_by_song_name(self, song_name: str) -> int | None:
         self._cursor.execute("SELECT id FROM song WHERE name = ?", (song_name,))
-        song_id = int(self._cursor.fetchone()[0])
+        fetch = self._cursor.fetchone()
+        if not fetch:
+            return None
+        song_id = int(fetch[0])
         return song_id
 
     def get_all_songs(self) -> dict[int, str]:
@@ -65,9 +66,12 @@ class DBConnection:
         self._cursor.execute("INSERT OR IGNORE INTO vote (better_id, worse_id) VALUES (?, ?)", (better_id, worse_id))
         self._connection.commit()
 
-    def insert_song(self, song: str):
+    def insert_song(self, song: str) -> int:
         self._cursor.execute("INSERT OR IGNORE INTO song (name) VALUES (?)", (song,))
         self._connection.commit()
+        self._cursor.execute("SELECT id FROM song WHERE name = ?", (song,))
+        song_id = self._cursor.fetchone()[0]
+        return song_id
 
     def disconnect(self):
         self._cursor.close()

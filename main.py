@@ -49,7 +49,9 @@ def rate_up(data: RateRequest) -> RateUpResponse:
     global cache
     if data.better_song == "" or data.worse_song == "":
         raise HTTPException(status_code=403, detail="Some parameters are empty")
-    cache.vote(data.better_song, data.worse_song)
+    success = cache.vote(data.better_song, data.worse_song)
+    if not success:
+        raise HTTPException(status_code=400, detail="An error occured when creating one of the song")
     res = RateUpResponse(response=f"{data.better_song} > {data.worse_song}")
     return res
 
@@ -57,7 +59,7 @@ def rate_up(data: RateRequest) -> RateUpResponse:
 def get_rates(song: str) -> SongInfoResponse:
     global cache
     song_id = cache.db.get_id_by_song_name(song)
-    if not cache.rates.is_node_exist(song_id):
+    if not song_id or not cache.rates.is_node_exist(song_id):
         raise HTTPException(status_code=404, detail=f"No song with the name \"{song}\" were found")
     graph_rank = cache.get_graph_rank_of(song)
     elo_rank = cache.get_elo_rank_of(song)
@@ -73,14 +75,20 @@ def status(data: StatusRequest) -> StatusBetweenSongsResponse:
     global cache
     first_song_id = cache.db.get_id_by_song_name(data.first_song)
     second_song_id = cache.db.get_id_by_song_name(data.second_song)
-    is_first_song_exists = graph.is_node_exist(first_song_id)
-    is_second_song_exists = graph.is_node_exist(second_song_id)
+    if not first_song_id and not second_song_id:
+        raise HTTPException(status_code=404, detail=f"\"{data.first_song}\" and \"{data.second_song}\" doesn't exist")
+    elif not first_song_id:
+        raise HTTPException(status_code=404, detail=f"\"{data.first_song}\" doesn't exist")
+    elif not second_song_id:
+        raise HTTPException(status_code=404, detail=f"\"{data.second_song}\" doesn't exist")
+    is_first_song_exists = cache.rates.is_node_exist(first_song_id)
+    is_second_song_exists = cache.rates.is_node_exist(second_song_id)
     if not is_first_song_exists and not is_second_song_exists:
-        raise HTTPException(status_code=404, detail=f"{data.first_song} and {data.second_song} weren't found")
+        raise HTTPException(status_code=404, detail=f"{data.first_song} and {data.second_song} weren't found in graph")
     elif not is_first_song_exists:
-        raise HTTPException(status_code=404, detail=f"No song with the name \"{data.first_song}\" were found")
+        raise HTTPException(status_code=404, detail=f"No song with the name \"{data.first_song}\" were found in graph")
     elif not is_second_song_exists:
-        raise HTTPException(status_code=404, detail=f"No song with the name \"{data.second_song}\" were found")
+        raise HTTPException(status_code=404, detail=f"No song with the name \"{data.second_song}\" were found in graph")
     res = get_status_between_songs(cache.rates, first_song_id, second_song_id)
     return res
 

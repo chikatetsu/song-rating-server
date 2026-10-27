@@ -64,15 +64,14 @@ class RatesCache:
         self._song_rates.update_rates(self.rates)
         self._old_song_rates.update_rates(self._song_rates.rates)
 
-    def vote(self, better_song: str, worse_song: str):
-        self.db.insert_song(better_song)
-        self.db.insert_song(worse_song)
-        better_id = self.db.get_id_by_song_name(better_song)
-        worse_id = self.db.get_id_by_song_name(worse_song)
+    def vote(self, better_song: str, worse_song: str) -> bool:
+        better_id = self.db.insert_song(better_song)
+        worse_id = self.db.insert_song(worse_song)
         if self.rates.create_edge(better_id, worse_id):
             self.elo_ranking.update_elo(better_song, worse_song)
             self.db.insert_vote(better_id, worse_id)
             self.notify_change()
+        return True
 
     def get_song_rates(self) -> list[RankObject]:
         self._song_rates.update_rates(self.rates)
