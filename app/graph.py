@@ -33,8 +33,8 @@ class Graph:
     def __len__(self):
         return len(self._adjacency_list)
 
-    def __getitem__(self, item: int) -> MusicNode:
-        return self._adjacency_list[item]
+    def __getitem__(self, item: int) -> MusicNode | None:
+        return self._adjacency_list.get(item, None)
 
     def keys(self):
         return self._adjacency_list.keys()
@@ -96,7 +96,6 @@ class Graph:
             rates[self.get_name(song_index)] = score
 
         return rates
-
 
     def map_deepness(self) -> dict[int, int]:
         visited: dict[int, int] = {}

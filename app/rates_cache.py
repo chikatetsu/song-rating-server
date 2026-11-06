@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from app.dto import RankObject
+from app.dto import RankObject, StatusBetweenSongsResponse
 from db_connection import DBConnection
 from app.elo_ranking import EloRanking
 from app.graph import Graph

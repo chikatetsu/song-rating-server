@@ -6,7 +6,7 @@ from os import getenv
 
 from app.dto import RateRequest, StatusRequest, RateUpResponse, RankResponse, SongInfoResponse, StatusBetweenSongsResponse
 from app.rates_cache import RatesCache
-from app.service import get_certitude, get_status_between_songs
+from app.service import get_certitude, get_status_between_songs, get_next_song
 
 
 load_dotenv()
@@ -107,6 +107,12 @@ def get_artist_rate() -> RankResponse:
     return res
 
 @app.get("/next_song", dependencies=[Depends(verify_bearer_token)])
-def get_next_song(song: str) -> str:
-    # TODO
-    return ""
+def next_song(song: str) -> str:
+    global cache
+    song_id = cache.db.get_id_by_song_name(song)
+    if not song_id:
+        raise HTTPException(status_code=404, detail=f"\"{song}\" doesn't exist")
+    res = get_next_song(cache.rates, song_id)
+    if res is None:
+        return ""
+    return res

@@ -43,10 +43,37 @@ def get_certitude(nb_votes: int, nb_songs: int) -> float:
     return percentage
 
 def get_status_between_songs(graph: Graph, first_song_id: int, second_song_id: int) -> StatusBetweenSongsResponse:
-    if first_song_id in graph[second_song_id].worse_songs:
-        response = StatusBetweenSongsResponse(message=f"{graph[second_song_id].name} > {graph[first_song_id].name}", is_compared=True)
-    elif second_song_id in graph[first_song_id].worse_songs:
-        response = StatusBetweenSongsResponse(message=f"{graph[first_song_id].name} > {graph[second_song_id].name}", is_compared=True)
+    first_song = graph[first_song_id]
+    second_song = graph[second_song_id]
+    if first_song is None:
+        return None
+    if second_song is None:
+        return None
+    if first_song_id in second_song.worse_songs:
+        response = StatusBetweenSongsResponse(message=f"{second_song.name} > {first_song.name}", is_compared=True)
+    elif second_song_id in first_song.worse_songs:
+        response = StatusBetweenSongsResponse(message=f"{first_song.name} > {second_song.name}", is_compared=True)
     else:
-        response = StatusBetweenSongsResponse(message=f"{graph[first_song_id].name} et {graph[second_song_id].name} n'ont jamais été comparé", is_compared=False)
+        response = StatusBetweenSongsResponse(message=f"{first_song.name} et {second_song.name} n'ont jamais été comparé", is_compared=False)
     return response
+
+def get_next_song(graph: Graph, song_id: int) -> str | None:
+    current_song = graph[song_id]
+    if current_song is None:
+        return None
+    for i in current_song.better_songs:
+        for j in graph[i].worse_songs:
+            if j in current_song.better_songs:
+                continue
+            if j in current_song.worse_songs:
+                continue
+            return graph[j].name
+
+    for i in current_song.worse_songs:
+        for j in graph[i].better_songs:
+            if j in current_song.better_songs:
+                continue
+            if j in current_song.worse_songs:
+                continue
+            return graph[j].name
+    return None
