@@ -106,12 +106,12 @@ def get_artist_rate() -> RankResponse:
     res = RankResponse(ranks=scores)
     return res
 
-@app.get("/next_song", dependencies=[Depends(verify_bearer_token)])
-def next_song(song: str) -> str:
+@app.get("/next_song/{current_song}", dependencies=[Depends(verify_bearer_token)])
+def next_song(current_song: str) -> str:
     global cache
-    song_id = cache.db.get_id_by_song_name(song)
+    song_id = cache.db.get_id_by_song_name(current_song)
     if not song_id:
-        raise HTTPException(status_code=404, detail=f"\"{song}\" doesn't exist")
+        raise HTTPException(status_code=404, detail=f"\"{current_song}\" doesn't exist")
     res = get_next_song(cache.rates, song_id)
     if res is None:
         return ""
