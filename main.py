@@ -117,6 +117,10 @@ def next_song(current_song: str) -> str:
         return ""
     return res
 
+@app.delete("/song/", dependencies=[Depends(verify_bearer_token)])
+def delete_empty_song():
+    return delete_song("")
+
 @app.delete("/song/{song}", dependencies=[Depends(verify_bearer_token)])
 def delete_song(song: str):
     global cache
