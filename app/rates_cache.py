@@ -106,6 +106,23 @@ class RatesCache:
                 return i
         return -1
 
+    def delete_song(self, song_id: int) -> bool:
+        song_to_delete = self.rates[song_id]
+        if song_to_delete is None:
+            return False
+
+        for i in song_to_delete.better_songs:
+            self.rates.remove_edge(song_id, i)
+            self.db.delete_vote(song_id, i)
+        for i in song_to_delete.worse_songs:
+            self.rates.remove_edge(song_id, i)
+            self.db.delete_vote(song_id, i)
+        self.rates.remove_node(song_id)
+        self.db.delete_song(song_id)
+
+        self.notify_change()
+        return True
+
     def notify_change(self):
         self._song_rates.set_has_outdated()
         self._artist_rates.set_has_outdated()

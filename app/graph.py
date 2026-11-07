@@ -30,6 +30,19 @@ class Graph:
 
         return is_vote_done
 
+    def remove_edge(self, song1: int, song2: int):
+        if song1 in self._adjacency_list[song2].worse_songs:
+            self._adjacency_list[song2].worse_songs.remove(song1)
+        if song1 in self._adjacency_list[song2].better_songs:
+            self._adjacency_list[song2].better_songs.remove(song1)
+        if song2 in self._adjacency_list[song1].worse_songs:
+            self._adjacency_list[song1].worse_songs.remove(song2)
+        if song2 in self._adjacency_list[song1].better_songs:
+            self._adjacency_list[song1].better_songs.remove(song2)
+
+    def remove_node(self, song_id: int):
+        self._adjacency_list.pop(song_id)
+
     def __len__(self):
         return len(self._adjacency_list)
 

@@ -116,3 +116,12 @@ def next_song(current_song: str) -> str:
     if res is None:
         return ""
     return res
+
+@app.delete("/song/{song}", dependencies=[Depends(verify_bearer_token)])
+def delete_song(song: str):
+    global cache
+    song_id = cache.db.get_id_by_song_name(song)
+    if not song_id:
+        raise HTTPException(status_code=404, detail=f"\"{song}\" doesn't exist")
+    res = cache.delete_song(song_id)
+    return res

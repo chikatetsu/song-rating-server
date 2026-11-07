@@ -73,6 +73,14 @@ class DBConnection:
         song_id = self._cursor.fetchone()[0]
         return song_id
 
+    def delete_vote(self, first_song_id: int, second_song_id: int):
+        self._cursor.execute("DELETE FROM vote WHERE better_id = ? AND worse_id = ?", (first_song_id, second_song_id))
+        self._cursor.execute("DELETE FROM song WHERE better_id = ? AND worse_id = ?", (second_song_id, first_song_id))
+
+    def delete_song(self, song_id: int):
+        self._cursor.execute("DELETE FROM song WHERE id = ?", (song_id,))
+        self._connection.commit()
+
     def disconnect(self):
         self._cursor.close()
         self._connection.close()
