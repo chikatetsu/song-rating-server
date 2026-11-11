@@ -69,6 +69,8 @@ def get_next_song(graph: Graph, song_id: int) -> str | None:
                 continue
             if j in current_song.worse_songs:
                 continue
+            if graph[j].name == "":
+                continue
             return graph[j].name
 
     for i in current_song.worse_songs:
@@ -78,6 +80,8 @@ def get_next_song(graph: Graph, song_id: int) -> str | None:
             if j in current_song.better_songs:
                 continue
             if j in current_song.worse_songs:
+                continue
+            if graph[j].name == "":
                 continue
             return graph[j].name
     return None
