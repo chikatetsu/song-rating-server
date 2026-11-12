@@ -114,7 +114,7 @@ def next_song(current_song: str) -> str:
         raise HTTPException(status_code=404, detail=f"\"{current_song}\" doesn't exist")
     res = get_next_song(cache.rates, song_id)
     if res is None:
-        return ""
+        return Response(status=204)
     return res
 
 @app.delete("/song/", dependencies=[Depends(verify_bearer_token)])

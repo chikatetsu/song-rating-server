@@ -62,9 +62,6 @@ def get_next_song(graph: Graph, song_id: int) -> str | None:
     if current_song is None:
         return None
     for i in current_song.better_songs:
-        if graph[i] is None:
-            current_song.better_songs.remove(i)
-            continue
         for j in graph[i].worse_songs:
             if j == song_id:
                 continue
@@ -72,30 +69,15 @@ def get_next_song(graph: Graph, song_id: int) -> str | None:
                 continue
             if j in current_song.worse_songs:
                 continue
-            if graph[j] is None:
-                graph[i].worse_songs.remove(j)
-                continue
-            if graph[j].name == "":
-                graph[i].worse_songs.remove(j)
-                continue
             return graph[j].name
 
     for i in current_song.worse_songs:
-        if graph[i] is None:
-            current_song.worse_songs.remove(i)
-            continue
         for j in graph[i].better_songs:
             if j == song_id:
                 continue
             if j in current_song.better_songs:
                 continue
             if j in current_song.worse_songs:
-                continue
-            if graph[j] is None:
-                graph[i].better_songs.remove(j)
-                continue
-            if graph[j].name == "":
-                graph[i].better_songs.remove(j)
                 continue
             return graph[j].name
     return None
