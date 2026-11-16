@@ -67,9 +67,14 @@ class Graph:
             return False
         if second_node_id not in self._adjacency_list:
             return False
+        if len(self._adjacency_list[first_node_id].worse_songs) == 0:
+            return False
+        if len(self._adjacency_list[second_node_id].better_songs) == 0:
+            return False
         for node_id in self._adjacency_list[first_node_id].worse_songs:
             if node_id == second_node_id:
                 return True
+        for node_id in self._adjacency_list[first_node_id].worse_songs:
             if self.is_better(node_id, second_node_id):
                 return True
         return False
@@ -79,9 +84,14 @@ class Graph:
             return False
         if second_node_id not in self._adjacency_list:
             return False
+        if len(self._adjacency_list[first_node_id].better_songs) == 0:
+            return False
+        if len(self._adjacency_list[second_node_id].worse_songs) == 0:
+            return False
         for node_id in self._adjacency_list[first_node_id].better_songs:
             if node_id == second_node_id:
                 return True
+        for node_id in self._adjacency_list[first_node_id].better_songs:
             if self.is_worse(node_id, second_node_id):
                 return True
         return False
