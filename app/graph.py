@@ -62,6 +62,28 @@ class Graph:
         res = node in self._adjacency_list
         return res
 
+    def is_better(self, first_node_id: int, second_node_id: int) -> bool:
+        if first_node_id not in self._adjacency_list:
+            return False
+        if second_node_id not in self._adjacency_list:
+            return False
+        for node_id in self._adjacency_list[first_node_id].worse_songs:
+            if node_id == second_node_id:
+                return True
+            return self.is_better(node_id, second_node_id)
+        return False
+
+    def is_worse(self, first_node_id: int, second_node_id: int) -> bool:
+        if first_node_id not in self._adjacency_list:
+            return False
+        if second_node_id not in self._adjacency_list:
+            return False
+        for node_id in self._adjacency_list[first_node_id].better_songs:
+            if node_id == second_node_id:
+                return True
+            return self.is_worse(node_id, second_node_id)
+        return False
+
     def rename_node(self, node_id: int, node_name: str):
         if node_id in self._adjacency_list:
             self._adjacency_list[node_id].name = node_name

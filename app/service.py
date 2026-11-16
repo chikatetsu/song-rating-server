@@ -49,10 +49,10 @@ def get_status_between_songs(graph: Graph, first_song_id: int, second_song_id: i
         return None
     if second_song is None:
         return None
-    if first_song_id in second_song.worse_songs:
-        response = StatusBetweenSongsResponse(message=f"{second_song.name} > {first_song.name}", is_compared=True)
-    elif second_song_id in first_song.worse_songs:
+    if graph.is_better(first_song_id, second_song_id):
         response = StatusBetweenSongsResponse(message=f"{first_song.name} > {second_song.name}", is_compared=True)
+    elif graph.is_worse(first_song_id, second_song_id):
+        response = StatusBetweenSongsResponse(message=f"{second_song.name} > {first_song.name}", is_compared=True)
     else:
         response = StatusBetweenSongsResponse(message=f"{first_song.name} et {second_song.name} n'ont jamais été comparé", is_compared=False)
     return response
@@ -61,27 +61,29 @@ def get_next_song(graph: Graph, song_id: int, ignore_song_id: int = -1) -> str |
     current_song = graph[song_id]
     if current_song is None:
         return None
+    # search for a better next song
     for i in current_song.better_songs:
         for j in graph[i].worse_songs:
             if j == song_id:
                 continue
             if j == ignore_song_id:
                 continue
-            if j in current_song.better_songs:
+            if graph.is_better(song_id, j):
                 continue
-            if j in current_song.worse_songs:
+            if graph.is_worse(song_id, j):
                 continue
             return graph[j].name
 
+    # search for a worse next song
     for i in current_song.worse_songs:
         for j in graph[i].better_songs:
             if j == song_id:
                 continue
             if j == ignore_song_id:
                 continue
-            if j in current_song.better_songs:
+            if graph.is_better(song_id, j):
                 continue
-            if j in current_song.worse_songs:
+            if graph.is_worse(song_id, j):
                 continue
             return graph[j].name
     return None
