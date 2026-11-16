@@ -57,13 +57,15 @@ def get_status_between_songs(graph: Graph, first_song_id: int, second_song_id: i
         response = StatusBetweenSongsResponse(message=f"{first_song.name} et {second_song.name} n'ont jamais été comparé", is_compared=False)
     return response
 
-def get_next_song(graph: Graph, song_id: int) -> str | None:
+def get_next_song(graph: Graph, song_id: int, ignore_song_id: int = -1) -> str | None:
     current_song = graph[song_id]
     if current_song is None:
         return None
     for i in current_song.better_songs:
         for j in graph[i].worse_songs:
             if j == song_id:
+                continue
+            if j == ignore_song_id:
                 continue
             if j in current_song.better_songs:
                 continue
@@ -74,6 +76,8 @@ def get_next_song(graph: Graph, song_id: int) -> str | None:
     for i in current_song.worse_songs:
         for j in graph[i].better_songs:
             if j == song_id:
+                continue
+            if j == ignore_song_id:
                 continue
             if j in current_song.better_songs:
                 continue
