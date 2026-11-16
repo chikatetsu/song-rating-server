@@ -63,41 +63,30 @@ class Graph:
         return res
 
     def is_better(self, first_node_id: int, second_node_id: int) -> bool:
-        if first_node_id not in self._adjacency_list:
+        if not self.is_node_exist(first_node_id):
             return False
-        if second_node_id not in self._adjacency_list:
+        if not self.is_node_exist(second_node_id):
             return False
-        if len(self._adjacency_list[first_node_id].worse_songs) == 0:
-            return False
-        if len(self._adjacency_list[second_node_id].better_songs) == 0:
-            return False
-        for node_id in self._adjacency_list[first_node_id].worse_songs:
-            if node_id == second_node_id:
-                return True
-        for node_id in self._adjacency_list[first_node_id].worse_songs:
-            if self.is_better(node_id, second_node_id):
-                return True
+
+        visited: set[int] = set()
+        stack = [first_node_id]
+        while stack:
+            current = stack.pop()
+            if current in visited:
+                continue
+            visited.add(current)
+            for node_id in self._adjacency_list[current].worse_songs:
+                if node_id == second_node_id:
+                    return True
+                if node_id not in visited:
+                    stack.append(node_id)
         return False
 
     def is_worse(self, first_node_id: int, second_node_id: int) -> bool:
-        if first_node_id not in self._adjacency_list:
-            return False
-        if second_node_id not in self._adjacency_list:
-            return False
-        if len(self._adjacency_list[first_node_id].better_songs) == 0:
-            return False
-        if len(self._adjacency_list[second_node_id].worse_songs) == 0:
-            return False
-        for node_id in self._adjacency_list[first_node_id].better_songs:
-            if node_id == second_node_id:
-                return True
-        for node_id in self._adjacency_list[first_node_id].better_songs:
-            if self.is_worse(node_id, second_node_id):
-                return True
-        return False
+        return self.is_better(second_node_id, first_node_id)
 
     def rename_node(self, node_id: int, node_name: str):
-        if node_id in self._adjacency_list:
+        if self.is_node_exist(node_id):
             self._adjacency_list[node_id].name = node_name
 
     def get_name(self, index: int) -> str:
