@@ -48,7 +48,7 @@ def get_rate() -> RankResponse:
 def rate_up(data: RateRequest) -> RateUpResponse:
     global cache
     if data.better_song == "" or data.worse_song == "":
-        raise HTTPException(status_code=403, detail="Some parameters are empty")
+        raise HTTPException(status_code=422, detail="Some parameters are empty")
     success = cache.vote(data.better_song, data.worse_song)
     if not success:
         raise HTTPException(status_code=400, detail="An error occured when creating one of the song")
@@ -107,7 +107,7 @@ def get_artist_rate() -> RankResponse:
     return res
 
 @app.get("/next_song/{current_song}/last_song/{last_song}", dependencies=[Depends(verify_bearer_token)])
-def next_song(current_song: str, last_song: str) -> str:
+def next_song_with_last(current_song: str, last_song: str) -> str | Response:
     global cache
     current_song_id = cache.db.get_id_by_song_name(current_song)
     last_song_id = cache.db.get_id_by_song_name(last_song)
@@ -121,7 +121,7 @@ def next_song(current_song: str, last_song: str) -> str:
     return res
 
 @app.get("/next_song/{current_song}", dependencies=[Depends(verify_bearer_token)])
-def next_song(current_song: str) -> str:
+def next_song(current_song: str) -> str | Response:
     global cache
     song_id = cache.db.get_id_by_song_name(current_song)
     if not song_id:
