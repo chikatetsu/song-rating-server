@@ -1,3 +1,4 @@
+from random import choice
 from re import split as re_split
 
 from app.dto import StatusBetweenSongsResponse, RankObject
@@ -61,6 +62,8 @@ def get_next_song(graph: Graph, song_id: int, ignore_song_id: int = -1) -> str |
     current_song = graph[song_id]
     if current_song is None:
         return None
+    next_songs = set()
+
     # search for a better next song
     for i in current_song.better_songs:
         for j in graph[i].worse_songs:
@@ -72,7 +75,7 @@ def get_next_song(graph: Graph, song_id: int, ignore_song_id: int = -1) -> str |
                 continue
             if graph.is_worse(song_id, j):
                 continue
-            return graph[j].name
+            next_songs.add(j)
 
     # search for a worse next song
     for i in current_song.worse_songs:
@@ -85,5 +88,9 @@ def get_next_song(graph: Graph, song_id: int, ignore_song_id: int = -1) -> str |
                 continue
             if graph.is_worse(song_id, j):
                 continue
-            return graph[j].name
-    return None
+            next_songs.add(j)
+
+    if len(next_songs) == 0:
+        return None
+    random_id = choice(list(next_songs))
+    return graph[random_id].name
